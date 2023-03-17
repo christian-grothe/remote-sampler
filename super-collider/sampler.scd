@@ -3,29 +3,11 @@ s.reboot;
 s.quit;
 s.freeAll;
 
-
 (
-~start.free;
-~stop.free;
-~rec.free;
-~data.free;
-~spray.free;
-~free.free;
-~dl.free;
-)
-~samplers = SparseArray.newClear(3,nil);
 
-(
-~samplers = [nil,nil,nil];
 ~buffers = [Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1)];
-)
 
-~buffers;
-~samplers;
-
-(
-~samplers = [nil,nil,nil];
-~buffers = [Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1)];
+~samplers = Order();
 
 ~start.free;
 ~stop.free;
@@ -70,16 +52,13 @@ SynthDef(\grainBuf, {
 	|data|
 	g = Synth(\grainBuf,[\bufNum,~buffers[data[1]],\envGate, 1]);
 	~samplers[data[1]] = g;
-	postln(~samplers);
-	postln(~buffers);
 },'/start');
 
 ~stop = OSCFunc({
 	|data|
-	if(~samplers[data[1]]){
 	~samplers[data[1]].set(\envGate,0);
-	};
-	postln("stop");
+
+	postln(~samplers[data[1]]);
 },'/stop');
 
 ~rec = OSCFunc({
