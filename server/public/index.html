@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remote Sampler</title>
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <button id="rec">REC</button>
+        <h3>Remote-Sampler</h3>
+      </header>
+      <div id="controll">
+        <div class="controll-indicator" id="controll-indicator"></div>
+      </div>
+      <div class="slider-container">
+        <div class="slider-wrapper">
+          <h3 class="slider-title">LPF</h3>
+          <div class="slider">
+            <div class="slider-line"></div>
+            <div class="pos-indicator"></div>
+          </div>
+        </div>
+
+        <div class="slider-wrapper">
+          <h3 class="slider-title">Spray</h3>
+          <div class="slider">
+            <div class="slider-line"></div>
+            <div class="pos-indicator"></div>
+          </div>
+        </div>
+
+        <div class="slider-wrapper">
+          <h3 class="slider-title">Frame</h3>
+          <div class="slider">
+            <div class="slider-line"></div>
+            <div class="pos-indicator"></div>
+          </div>
+        </div>
+
+        <div class="slider-wrapper">
+          <h3 class="slider-title">Delay</h3>
+          <div class="slider">
+            <div class="slider-line"></div>
+            <div class="pos-indicator"></div>
+          </div>
+        </div>
+
+        <div class="slider-wrapper">
+          <h3 class="slider-title">Time</h3>
+          <div class="slider">
+            <div class="slider-line"></div>
+            <div class="pos-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="assets/index.js"></script>
+  </body>
+</html>
