@@ -1,11 +1,11 @@
 export class Slider {
-  constructor(element, index, controllIndicator) {
+  constructor(element, index, controllIndicator, val) {
     this.index = index;
     this.element = element;
     this.controllIndicator = controllIndicator;
     this.posIndicator = this.element.getElementsByClassName("pos-indicator")[0];
     this.rect = this.element.getBoundingClientRect();
-    this.data = 0.5;
+    this.data = val;
 
     this.element.addEventListener("touchmove", (e) => {
       e.preventDefault();
@@ -23,5 +23,14 @@ export class Slider {
         }
       });
     });
+
+    this.reset();
+  }
+
+  reset() {
+    this.posIndicator.style.bottom = `${this.data * 100}%`;
+    if (this.index === 2) {
+      this.controllIndicator.style.width = "2px";
+    }
   }
 }

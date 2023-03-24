@@ -76,13 +76,11 @@ SynthDef(\grainBuf, {
 	~samplers[data[8]].set(\windowSize, data[5]);
 },'/data');
 
-/*
+
 ~free = OSCFunc({
-	|data|
-	~samplers[data[1]] = nil;
-	postln(~samplers);
-},'/free')
-*/
+	postln("init");
+},'/init')
+
 )
 
 ~dl = Synth(\delay);

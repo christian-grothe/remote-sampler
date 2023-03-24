@@ -8,7 +8,33 @@
     <link rel="stylesheet" href="assets/style.css" />
   </head>
   <body>
-    <div class="wrapper">
+    <!-- Overlay -->
+    <div id="overlay">
+      <button id="start">Start</button>
+      <button id="exit-queue" style="display: none">Exit</button>
+      <div id="overlay-infos">
+        <p>
+          active users:
+          <span id="active-users"> 0</span>/<span id="max-active-users">0</span>
+        </p>
+        <p>
+          queue length:
+          <span id="queue-length"> 0</span>
+        </p>
+        <p>
+          queue position:
+          <span id="queue-pos"> -</span>
+        </p>
+      </div>
+      <p>
+        <span id="queue-info" style="display: none"
+          >You are standing in line. Wait until its your turn!</span
+        >
+      </p>
+    </div>
+
+    <!-- App -->
+    <div class="wrapper" id="wrapper">
       <header>
         <button id="rec">REC</button>
         <h3>Remote-Sampler</h3>
@@ -57,6 +83,7 @@
           </div>
         </div>
       </div>
+      <button id="exit">exit</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
