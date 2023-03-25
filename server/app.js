@@ -33,8 +33,8 @@ server.listen(PORT, () => {
 // IO Connections
 io.on("connection", (socket) => {
   // init socket
-  userList.set(socket.id, { isActive: false, activeUserIndex: null });
-  console.log(userList);
+  //userList.set(socket.id, { isActive: false, activeUserIndex: null });
+  //console.log(userList);
   const initData = { queueLength: queue.length, activeUsers, maxActiveUsers };
   socket.join("remote-synth");
   socket.emit("init", initData);
@@ -146,22 +146,19 @@ io.on("connection", (socket) => {
 
 // Functions
 function calcIndex() {
-  const activeUsers = Array.from(userList.values()).filter(
-    (user) => user.isActive
-  );
-  let usedIndexes = new Set(activeUsers.map((user) => user.activeUserIndex));
-
+  const vals = Array.from(userList.values());
   let freeIndex = 0;
-  while (usedIndexes.has(freeIndex)) {
+  vals.forEach((val) => {
+    if (freeIndex !== val.activeUserIndex) return;
     freeIndex++;
-  }
+  });
   return freeIndex;
 }
 
 function removeActiveUser(socket) {
   console.log("remove Active User");
   const user = userList.get(socket.id);
-  if (user.isActive) {
+  if (user) {
     activeUsers--;
     userList.delete(socket.id);
     console.log(userList);
@@ -172,9 +169,9 @@ function removeActiveUser(socket) {
 function deactivatUser(socket) {
   console.log("deactivate User");
   const user = userList.get(socket.id);
-  if (user.isActive) {
+  if (user) {
     activeUsers--;
-    userList.set(socket.id, { isActive: false, activeUserIndex: null });
+    userList.delete(socket.id);
     io.to("remote-synth").emit("active-users", activeUsers);
   }
 }
@@ -212,7 +209,6 @@ function activateUser(id) {
   const usersIndex = calcIndex();
 
   userList.set(id, {
-    isActive: true,
     activeUserIndex: usersIndex,
   });
 
