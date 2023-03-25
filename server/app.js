@@ -41,7 +41,6 @@ io.on("connection", (socket) => {
   socket.emit("init", initData);
 
   socket.on("disconnect", () => {
-    console.log("user disconnected");
     removeActiveUser(socket);
     removeUserFromCueue(socket);
   });
@@ -55,9 +54,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("exit", () => {
-    console.log("user exits");
-    deactivatUser(socket);
-    fromQueueToActive();
+    removeActiveUser(socket);
   });
 
   socket.on("exit-queue", () => {
@@ -157,43 +154,28 @@ function calcIndex() {
 }
 
 function removeActiveUser(socket) {
-  console.log("remove Active User");
-  const user = userList.get(socket.id);
-  if (user) {
-    userList.delete(socket.id);
-    console.log(userList);
-    fromQueueToActive();
-  }
-}
-
-function deactivatUser(socket) {
-  console.log("deactivate User");
   const user = userList.get(socket.id);
   if (user) {
     userList.delete(socket.id);
     io.to("remote-synth").emit("active-users", userList.size);
+    fromQueueToActive();
   }
 }
 
 function addUserToCueue(socket) {
-  console.log("add user to queue");
   queue.push(socket.id);
-  console.log(queue);
   updateQueueData();
 }
 
 function removeUserFromCueue(socket) {
-  console.log("remove user from queue");
   const index = queue.indexOf(socket.id);
   if (index > -1) {
     queue.splice(index, 1);
-    console.log(queue);
     updateQueueData();
   }
 }
 
 function fromQueueToActive() {
-  console.log("from queue to active");
   if (queue.length > 0) {
     const userId = queue.shift();
     updateQueueData();
@@ -202,23 +184,17 @@ function fromQueueToActive() {
 }
 
 function activateUser(id) {
-  console.log("activate user");
-
   const socket = io.sockets.sockets.get(id);
   const usersIndex = calcIndex();
 
   userList.set(id, {
     activeUserIndex: usersIndex,
   });
-
-  console.log(userList);
   socket.emit("start");
   io.to("remote-synth").emit("active-users", userList.size);
 }
 
 function updateQueueData() {
-  console.log("update queue data");
-
   io.to("remote-synth").emit("queue-length", queue.length);
 
   queue.forEach((id, i) => {
