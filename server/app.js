@@ -7,7 +7,6 @@ const io = new Server(server);
 const PORT = 3000;
 const maxActiveUsers = 3;
 
-let activeUsers = 0;
 let userList = new Map();
 let queue = new Array();
 
@@ -33,9 +32,11 @@ server.listen(PORT, () => {
 // IO Connections
 io.on("connection", (socket) => {
   // init socket
-  //userList.set(socket.id, { isActive: false, activeUserIndex: null });
-  //console.log(userList);
-  const initData = { queueLength: queue.length, activeUsers, maxActiveUsers };
+  const initData = {
+    queueLength: queue.length,
+    activeUsers: userList.size,
+    maxActiveUsers,
+  };
   socket.join("remote-synth");
   socket.emit("init", initData);
 
@@ -46,7 +47,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start", () => {
-    if (activeUsers >= maxActiveUsers) {
+    if (userList.size >= maxActiveUsers) {
       addUserToCueue(socket);
     } else {
       activateUser(socket.id);
@@ -159,7 +160,6 @@ function removeActiveUser(socket) {
   console.log("remove Active User");
   const user = userList.get(socket.id);
   if (user) {
-    activeUsers--;
     userList.delete(socket.id);
     console.log(userList);
     fromQueueToActive();
@@ -170,9 +170,8 @@ function deactivatUser(socket) {
   console.log("deactivate User");
   const user = userList.get(socket.id);
   if (user) {
-    activeUsers--;
     userList.delete(socket.id);
-    io.to("remote-synth").emit("active-users", activeUsers);
+    io.to("remote-synth").emit("active-users", userList.size);
   }
 }
 
@@ -212,10 +211,9 @@ function activateUser(id) {
     activeUserIndex: usersIndex,
   });
 
-  activeUsers++;
   console.log(userList);
   socket.emit("start");
-  io.to("remote-synth").emit("active-users", activeUsers);
+  io.to("remote-synth").emit("active-users", userList.size);
 }
 
 function updateQueueData() {
