@@ -1,0 +1,13 @@
+config:
+  target: "http://my-app.local"
+  phases:
+    - duration: 300
+      arrivalRate: 1
+
+scenarios:
+  - name: "Emit an event"
+    engine: socketio
+    flow:
+      - emit:
+          channel: "start"
+      - think: 300

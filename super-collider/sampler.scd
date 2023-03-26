@@ -4,7 +4,6 @@ s.quit;
 s.freeAll;
 
 (
-
 ~buffers = [Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1)];
 
 ~samplers = Order();
@@ -23,8 +22,8 @@ SynthDef(\record,{
 }).add;
 
 SynthDef(\grainBuf, {
-	|rate = 1,speed = 1, bufNum = 0, amp = 0.3, grainDur = 0.1, pos = 0, att= 0.05, rel = 3, modFq = 10, envGate = 0, dens = 20, windowSize = 0.2, spray = 0, lpf = 2500|
-	var sig, env, delayBuf, delay;
+	|rate = 1,speed = 1, bufNum = 0, amp = 0.3, grainDur = 0.1, pos = 0, att= 1, rel = 3, modFq = 10, envGate = 0, dens = 20, windowSize = 0.2, spray = 0, lpf = 2500, revAmount = 0.5, revRoom = 0.5|
+	var sig, env, delayBuf, rev;
 	sig = GrainBuf.ar(
 		numChannels: 2,
 		trigger: Impulse.ar(dens),
@@ -39,11 +38,18 @@ SynthDef(\grainBuf, {
 		) / BufSamples.ir(bufNum),
 		pan: WhiteNoise.kr(),
 	);
-	env = EnvGen.ar(Env.asr(0.01,1,rel),envGate,doneAction: 2);
+	env = EnvGen.ar(Env.asr(att,1,rel),envGate);
 	sig = LPF.ar(sig,lpf * 2500 + 100);
 	sig = sig * env;
-	sig = sig;
+	rev = FreeVerb.ar(
+		in: sig * revAmount,
+		mix: 1,
+		room: revRoom,
+		damp: 0.5,
+	);
+	sig = sig + rev;
 	sig = sig * amp;
+	DetectSilence.ar(sig, doneAction: 2);
 	Out.ar(0, sig);
 }).add;
 
@@ -70,10 +76,13 @@ SynthDef(\grainBuf, {
 ~data = OSCFunc({
 	|data|
 	~samplers[data[8]].set(\pos, data[1]);
-	~samplers[data[8]].set(\speed, data[2]);
+	//~samplers[data[8]].set(\speed, data[2]);
+	~samplers[data[8]].set(\rate, data[2] * 2);
 	~samplers[data[8]].set(\lpf, data[3]);
-	~samplers[data[8]].set(\spray, data[4]);
+	~samplers[data[8]].set(\spray, data[4] * 0.25);
 	~samplers[data[8]].set(\windowSize, data[5]);
+	~samplers[data[8]].set(\revAmount, data[6]);
+	~samplers[data[8]].set(\revRoom, data[7]);
 },'/data');
 
 

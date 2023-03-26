@@ -37,6 +37,18 @@ export class Controller {
     x = e.touches[0].clientX - rect.left;
     y = e.touches[0].clientY - rect.top;
 
+    // Check if touch event is outside the rectangle
+    // if (x < 0) {
+    //   x = 0;
+    // } else if (x > rect.width) {
+    //   x = rect.width;
+    // }
+    if (y < 0) {
+      y = 0;
+    } else if (y > rect.height) {
+      y = rect.height;
+    }
+
     requestAnimationFrame(() => {
       this.controllIndicator.style.left = `${x}px`;
       this.frameSize =

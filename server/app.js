@@ -63,6 +63,7 @@ io.on("connection", (socket) => {
 
   socket.on("rec", () => {
     const user = userList.get(socket.id);
+    if (!user) return;
     udpPort.send({
       address: "/rec",
       args: [
@@ -76,6 +77,7 @@ io.on("connection", (socket) => {
 
   socket.on("touchstart", () => {
     const user = userList.get(socket.id);
+    if (!user) return;
     udpPort.send({
       address: "/start",
       args: [
@@ -89,6 +91,7 @@ io.on("connection", (socket) => {
 
   socket.on("touchend", () => {
     const user = userList.get(socket.id);
+    if (!user) return;
     udpPort.send({
       address: "/stop",
       args: [
@@ -102,6 +105,7 @@ io.on("connection", (socket) => {
 
   socket.on("data", (data) => {
     const user = userList.get(socket.id);
+    if (!user) return;
     udpPort.send({
       address: "/data",
       args: [
@@ -155,11 +159,19 @@ function calcIndex() {
 
 function removeActiveUser(socket) {
   const user = userList.get(socket.id);
-  if (user) {
-    userList.delete(socket.id);
-    io.to("remote-synth").emit("active-users", userList.size);
-    fromQueueToActive();
-  }
+  if (!user) return;
+  udpPort.send({
+    address: "/stop",
+    args: [
+      {
+        type: "i",
+        value: user.activeUserIndex,
+      },
+    ],
+  });
+  userList.delete(socket.id);
+  io.to("remote-synth").emit("active-users", userList.size);
+  fromQueueToActive();
 }
 
 function addUserToCueue(socket) {

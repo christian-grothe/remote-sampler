@@ -12,7 +12,12 @@ export class Slider {
       const pos = e.touches[0].clientY - this.rect.top;
       const data = (this.rect.height - pos) / this.rect.height;
       if (data < 0 || data > 1) return;
-      this.data = data;
+
+      if (this.index === 2) {
+        this.data = data * 0.25;
+      } else {
+        this.data = data;
+      }
 
       requestAnimationFrame(() => {
         this.posIndicator.style.top = `${pos}px`;
