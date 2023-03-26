@@ -14,7 +14,7 @@ const osc = require("osc");
 const udpPort = new osc.UDPPort({
   localAddress: "0.0.0.0",
   localPort: 9000, // Change this to the port number you want to use
-  remoteAddress: "127.0.0.1",
+  remoteAddress: "127.0.0.1", // Change this to remote Address of SuperCollider
   remotePort: 57120, // Change this to the port number SuperCollider is listening on
 });
 udpPort.open();
