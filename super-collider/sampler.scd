@@ -14,6 +14,8 @@ s.freeAll;
 ~data.free;
 ~spray.free;
 
+~scale = [-24,-19,-12,-9,-7,-5,-2,0,3,5,7,10,12];
+
 SynthDef(\record,{
 	|bufnum = 0|
 	var sig;
@@ -77,37 +79,11 @@ SynthDef(\grainBuf, {
 	|data|
 	~samplers[data[8]].set(\pos, data[1]);
 	//~samplers[data[8]].set(\speed, data[2]);
-	~samplers[data[8]].set(\rate, data[2] * 2);
+	~samplers[data[8]].set(\rate, (~scale[data[2] * (~scale.size - 1)].midiratio));
 	~samplers[data[8]].set(\lpf, data[3]);
-	~samplers[data[8]].set(\spray, data[4] * 0.25);
+	~samplers[data[8]].set(\spray, data[4] * 0.1);
 	~samplers[data[8]].set(\windowSize, data[5]);
 	~samplers[data[8]].set(\revAmount, data[6]);
 	~samplers[data[8]].set(\revRoom, data[7]);
 },'/data');
-
-
-~free = OSCFunc({
-	postln("init");
-},'/init')
-
 )
-
-~dl = Synth(\delay);
-SynthDef(\delay, {
-	|feedback, time|
-	var delay, delayBuf, sig;
-	delayBuf = Buffer.alloc(s, 44100 * 2, 2);
-	sig = In.ar(4,2);
-	delay = PingPong.ar(
-		bufnum: delayBuf,
-		inputs: sig,
-		delayTime: time,
-		feedback: feedback,
-		rotate: 1,
-	);
-	// sig = sig + delay;
-	Out.ar(0,sig);
-}).add;
-
-~group = Group.new();
-~group.free;
