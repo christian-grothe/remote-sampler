@@ -34,8 +34,8 @@ export class Controller {
   // private functions
   _getData(e, rect) {
     let x, y;
-    x = e.touches[0].clientX - rect.left;
-    y = e.touches[0].clientY - rect.top;
+    x = e.targetTouches[0].clientX - rect.left;
+    y = e.targetTouches[0].clientY - rect.top;
 
     // Check if touch event is outside the rectangle
     // if (x < 0) {

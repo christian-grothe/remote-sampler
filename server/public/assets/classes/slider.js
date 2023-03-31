@@ -9,7 +9,7 @@ export class Slider {
 
     this.element.addEventListener("touchmove", (e) => {
       e.preventDefault();
-      const pos = e.touches[0].clientY - this.rect.top;
+      const pos = e.targetTouches[0].clientY - this.rect.top;
       const data = (this.rect.height - pos) / this.rect.height;
       if (data < 0 || data > 1) return;
 
