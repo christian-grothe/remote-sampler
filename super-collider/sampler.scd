@@ -4,6 +4,11 @@ s.quit;
 s.freeAll;
 
 (
+~sliders.do({
+	|slider|
+	slider.free;
+});
+
 ~buffers = [Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1),Buffer.alloc(s, s.sampleRate * 10, 1)];
 
 ~samplers = Order();
@@ -11,7 +16,7 @@ s.freeAll;
 ~start.free;
 ~stop.free;
 ~rec.free;
-~data.free;
+~controller.free;
 ~spray.free;
 
 ~scale = [-24,-19,-12,-9,-7,-5,-2,0,3,5,7,10,12];
@@ -56,34 +61,70 @@ SynthDef(\grainBuf, {
 }).add;
 
 /* OSC Connections */
+
+// start a new grainBuf
 ~start = OSCFunc({
 	|data|
-	g = Synth(\grainBuf,[\bufNum,~buffers[data[1]],\envGate, 1]);
-	~samplers[data[1]] = g;
+	g = Synth(\grainBuf,[
+		\envGate, 1,
+		\pos, data[1],
+		\rate, (~scale[data[2] * (~scale.size - 1)]).midiratio,
+		\lpf, data[3],
+		\spray, data[4] * 0.1,
+		\windowSize, data[5],
+		\revAmount, data[6],
+		\revRoom, data[7],
+		\bufNum,~buffers[data[8]],
+	]);
+	~samplers[data[8]] = g;
 },'/start');
 
+// stop a grainBuf
 ~stop = OSCFunc({
 	|data|
 	~samplers[data[1]].set(\envGate,0);
 
-	postln(~samplers[data[1]]);
 },'/stop');
 
+// record to a buffer
 ~rec = OSCFunc({
 	|data|
 	Synth(\record,[\bufnum, ~buffers[data[1]]]);
 	postln(data);
 },'/rec');
 
-~data = OSCFunc({
+// get controller data
+~controller = OSCFunc({
 	|data|
-	~samplers[data[8]].set(\pos, data[1]);
-	//~samplers[data[8]].set(\speed, data[2]);
-	~samplers[data[8]].set(\rate, (~scale[data[2] * (~scale.size - 1)].midiratio));
-	~samplers[data[8]].set(\lpf, data[3]);
-	~samplers[data[8]].set(\spray, data[4] * 0.1);
-	~samplers[data[8]].set(\windowSize, data[5]);
-	~samplers[data[8]].set(\revAmount, data[6]);
-	~samplers[data[8]].set(\revRoom, data[7]);
-},'/data');
+	~samplers[data[3]].set(\pos, data[1]);
+	~samplers[data[3]].set(\rate, (~scale[data[2] * (~scale.size - 1)].midiratio));
+},'/controller');
+
+// get slider data
+~sliders = 5.collect({
+	|i|
+	var addr;
+	addr = "/slider"++i;
+	OSCFunc({
+		|data|
+		if(i == 0, {
+			~samplers[data[2]].set(\lpf, data[1]);
+		});
+		if(i == 1, {
+			~samplers[data[2]].set(\spray, data[1]);
+		});
+		if(i == 2, {
+			~samplers[data[2]].set(\windowSize, data[1]);
+		});
+		if(i == 3, {
+			~samplers[data[2]].set(\revAmount, data[1]);
+		});
+		if(i == 4, {
+			~samplers[data[2]].set(\revRoom, data[1]);
+		});
+	},addr);
+})
 )
+
+
+

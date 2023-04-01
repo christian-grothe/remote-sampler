@@ -1,5 +1,5 @@
 export class Slider {
-  constructor(element, index, controllIndicator, val) {
+  constructor(element, index, controllIndicator, val, socket) {
     this.index = index;
     this.element = element;
     this.controllIndicator = controllIndicator;
@@ -18,6 +18,8 @@ export class Slider {
       } else {
         this.data = data;
       }
+
+      socket.emit(`sliderData${this.index}`, this.data);
 
       requestAnimationFrame(() => {
         this.posIndicator.style.top = `${pos}px`;

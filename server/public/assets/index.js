@@ -28,7 +28,7 @@ window.onload = function () {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   const sliders = sliderElements.map((element, i) => {
-    return new Slider(element, i, controllIndicator, initVals[i]);
+    return new Slider(element, i, controllIndicator, initVals[i], socket);
   });
 
   const controller = new Controller(socket, controllIndicator, sliders);
@@ -38,8 +38,7 @@ window.onload = function () {
   });
 
   controll.addEventListener("touchstart", function (e) {
-    controller.touchstart();
-    controller.sendControllData(e, rect);
+    controller.touchstart(e, rect);
   });
 
   controll.addEventListener("touchend", () => {
@@ -76,7 +75,7 @@ window.onload = function () {
     queueLength.innerHTML = data.queueLength;
     activeUsers.innerHTML = data.activeUsers;
     maxActiveUsersField.innerHTML = data.maxActiveUsers;
-    showOverlay();
+    exit();
   });
 
   socket.on("queue-length", (data) => {

@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const PORT = 3000;
 const maxActiveUsers = 3;
+const maxSliders = 5;
 
 let userList = new Map();
 let queue = new Array();
@@ -75,39 +76,11 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("touchstart", () => {
+  socket.on("touchstart", (data) => {
     const user = userList.get(socket.id);
     if (!user) return;
     udpPort.send({
       address: "/start",
-      args: [
-        {
-          type: "i",
-          value: user.activeUserIndex,
-        },
-      ],
-    });
-  });
-
-  socket.on("touchend", () => {
-    const user = userList.get(socket.id);
-    if (!user) return;
-    udpPort.send({
-      address: "/stop",
-      args: [
-        {
-          type: "i",
-          value: user.activeUserIndex,
-        },
-      ],
-    });
-  });
-
-  socket.on("data", (data) => {
-    const user = userList.get(socket.id);
-    if (!user) return;
-    udpPort.send({
-      address: "/data",
       args: [
         {
           type: "f",
@@ -144,6 +117,64 @@ io.on("connection", (socket) => {
       ],
     });
   });
+
+  socket.on("touchend", () => {
+    const user = userList.get(socket.id);
+    if (!user) return;
+    udpPort.send({
+      address: "/stop",
+      args: [
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+      ],
+    });
+  });
+
+  // send controller data to super collider
+  socket.on("controllerData", (data) => {
+    const user = userList.get(socket.id);
+    if (!user) return;
+    udpPort.send({
+      address: "/controller",
+      args: [
+        {
+          type: "f",
+          value: data.x,
+        },
+        {
+          type: "f",
+          value: data.y,
+        },
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+      ],
+    });
+  });
+
+  // send slider data to super collider
+  for (let i = 0; i < maxSliders; i++) {
+    socket.on(`sliderData${i}`, (data) => {
+      const user = userList.get(socket.id);
+      if (!user) return;
+      udpPort.send({
+        address: `/slider${i}`,
+        args: [
+          {
+            type: "f",
+            value: data,
+          },
+          {
+            type: "i",
+            value: user.activeUserIndex,
+          },
+        ],
+      });
+    });
+  }
 });
 
 // Functions
