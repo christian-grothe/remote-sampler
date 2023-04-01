@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const PORT = 3000;
 const maxActiveUsers = 3;
-const maxSliders = 5;
+const sliderNum = 5;
 
 let userList = new Map();
 let queue = new Array();
@@ -156,7 +156,7 @@ io.on("connection", (socket) => {
   });
 
   // send slider data to super collider
-  for (let i = 0; i < maxSliders; i++) {
+  for (let i = 0; i < sliderNum; i++) {
     socket.on(`sliderData${i}`, (data) => {
       const user = userList.get(socket.id);
       if (!user) return;
