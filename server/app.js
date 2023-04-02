@@ -140,6 +140,7 @@ io.on("connection", (socket) => {
 
   // send controller data to super collider
   socket.on("controllerData", (data) => {
+    console.log(data);
     const user = userList.get(socket.id);
     if (!user) return;
     //console.log(data);

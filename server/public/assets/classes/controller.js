@@ -10,8 +10,7 @@ export class Controller {
 
   touchstart(e, rect) {
     Array.from(e.changedTouches).forEach((touch) => {
-      _createIndicator(touch, this.controll);
-      this.indicators.set(touch.identifier, newIndicator);
+      this._createIndicator(touch, this.controll, rect);
       this._setCoords(e, rect);
       this.socket.emit("touchstart", this._collectData());
     });
@@ -48,7 +47,7 @@ export class Controller {
   }
 
   // private functions
-  _createIndicator(touch, controll) {
+  _createIndicator(touch, controll, rect) {
     const x = touch.clientX - rect.left;
     const newIndicator = document.createElement("div");
     newIndicator.classList.add("controll-indicator");
@@ -57,6 +56,7 @@ export class Controller {
     newIndicator.style.left = `${x}px`;
     newIndicator.style.width = `${this.frameSize}%`;
     controll.appendChild(newIndicator);
+    this.indicators.set(touch.identifier, newIndicator);
   }
 
   _collectData() {
