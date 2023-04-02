@@ -8,11 +8,15 @@ export class Controller {
     this.controll = document.getElementById("controll");
   }
 
+  rec() {
+    this.socket.emit("rec");
+  }
+
   touchstart(e, rect) {
     Array.from(e.changedTouches).forEach((touch) => {
-      this._createIndicator(touch, this.controll, rect);
+      this._createIndicator(touch, rect);
       this._setCoords(e, rect);
-      this.socket.emit("touchstart", this._collectData());
+      this.socket.emit("touchstart", this._collectData(touch.identifier));
     });
   }
 
@@ -26,10 +30,6 @@ export class Controller {
         this.socket.emit("touchend", touch.identifier);
       }, 50);
     });
-  }
-
-  rec() {
-    this.socket.emit("rec");
   }
 
   touchmove(e, rect) {
@@ -47,7 +47,7 @@ export class Controller {
   }
 
   // private functions
-  _createIndicator(touch, controll, rect) {
+  _createIndicator(touch, rect) {
     const x = touch.clientX - rect.left;
     const newIndicator = document.createElement("div");
     newIndicator.classList.add("controll-indicator");
@@ -55,16 +55,17 @@ export class Controller {
     newIndicator.id = `touch${touch.identifier}`;
     newIndicator.style.left = `${x}px`;
     newIndicator.style.width = `${this.frameSize}%`;
-    controll.appendChild(newIndicator);
+    this.controll.appendChild(newIndicator);
     this.indicators.set(touch.identifier, newIndicator);
   }
 
-  _collectData() {
+  _collectData(identifier) {
+    const newCoords = this.coords.get(identifier);
+    const coordsData = { id: identifier, x: newCoords.x, y: newCoords.y };
     const sliderData = this._getSliderData();
-    const coordsArray = this._coordsToArray();
 
     return {
-      coordsArray,
+      coordsData,
       sliderData,
     };
   }

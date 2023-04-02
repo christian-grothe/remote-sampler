@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
 
   socket.on("touchend", (data) => {
     const user = userList.get(socket.id);
-    //console.log(data);
+    console.log(data);
     if (!user) return;
     udpPort.send({
       address: "/stop",
@@ -140,7 +140,7 @@ io.on("connection", (socket) => {
 
   // send controller data to super collider
   socket.on("controllerData", (data) => {
-    console.log(data);
+    // console.log(data);
     const user = userList.get(socket.id);
     if (!user) return;
     //console.log(data);
