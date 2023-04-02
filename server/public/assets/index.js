@@ -8,7 +8,6 @@ window.onload = function () {
   const controll = document.getElementById("controll");
   const rect = controll.getBoundingClientRect();
   const sliderElements = Array.from(document.querySelectorAll(".slider"));
-  const controllIndicator = document.getElementById("controll-indicator");
   const wrapper = document.getElementById("wrapper");
   const exitButton = document.getElementById("exit");
 
@@ -27,11 +26,11 @@ window.onload = function () {
 
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  const sliders = sliderElements.map((element, i) => {
-    return new Slider(element, i, controllIndicator, initVals[i], socket);
-  });
+  const controller = new Controller(socket);
 
-  const controller = new Controller(socket, controllIndicator, sliders);
+  const sliders = sliderElements.map((element, i) => {
+    return new Slider(element, i, initVals[i], socket, controller);
+  });
 
   rec.addEventListener("click", () => {
     controller.rec();
@@ -41,17 +40,17 @@ window.onload = function () {
     controller.touchstart(e, rect);
   });
 
-  controll.addEventListener("touchend", () => {
-    controller.touchend();
+  controll.addEventListener("touchend", (e) => {
+    controller.touchend(e);
   });
 
-  controll.addEventListener("touchcancel", () => {
-    controller.touchend();
+  controll.addEventListener("touchcancel", (e) => {
+    controller.touchend(e);
   });
 
   controll.addEventListener("touchmove", function (e) {
     e.preventDefault();
-    controller.sendControllData(e, rect);
+    controller.touchmove(e, rect);
   });
 
   exitButton.addEventListener("click", () => {

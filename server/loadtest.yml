@@ -1,8 +1,9 @@
 config:
-  target: "http://my-app.local"
+  #target: "http://my-app.local"
+  target: "http://localhost:3000"
   phases:
     - duration: 300
-      arrivalRate: 1
+      arrivalRate: 20
 
 scenarios:
   - name: "Emit an event"

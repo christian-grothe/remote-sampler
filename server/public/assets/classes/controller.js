@@ -1,63 +1,82 @@
 export class Controller {
-  constructor(socket, controllIndicator, sliders) {
+  constructor(socket) {
     this.socket = socket;
-    this.controllIndicator = controllIndicator;
+    this.indicators = new Map();
+    this.coords = new Map();
+    this.sliders = new Array();
     this.frameSize = 0;
-    this.sliders = sliders;
-    this.isTouched = false;
+    this.controll = document.getElementById("controll");
   }
 
   touchstart(e, rect) {
-    if (this.isTouched) return;
-    this.socket.emit("touchstart", this._initData(e, rect));
-    this.controllIndicator.classList.add("animate");
-    this.isTouched = true;
+    Array.from(e.changedTouches).forEach((touch) => {
+      _createIndicator(touch, this.controll);
+      this.indicators.set(touch.identifier, newIndicator);
+      this._setCoords(e, rect);
+      this.socket.emit("touchstart", this._collectData());
+    });
   }
 
-  touchend() {
-    setTimeout(() => {
-      this.isTouched = false;
-      this.socket.emit("touchend");
-      this.controllIndicator.classList.remove("animate");
-    }, 50);
+  touchend(e) {
+    Array.from(e.changedTouches).forEach((touch) => {
+      const indicator = document.getElementById(`touch${touch.identifier}`);
+      this.indicators.delete(touch.identifier);
+      this.coords.delete(touch.identifier);
+      indicator.remove();
+      setTimeout(() => {
+        this.socket.emit("touchend", touch.identifier);
+      }, 50);
+    });
   }
 
   rec() {
     this.socket.emit("rec");
   }
 
-  sendControllData(e, rect) {
-    this.socket.emit("controllerData", this._getControllData(e, rect));
+  touchmove(e, rect) {
+    this._setCoords(e, rect);
+    this.socket.emit("controllerData", this._coordsToArray());
+  }
+
+  setFrameSize(size) {
+    this.frameSize = size;
+    for (const [key, value] of this.indicators.entries()) {
+      requestAnimationFrame(() => {
+        value.style.width = `${size}%`;
+      });
+    }
   }
 
   // private functions
-  _initData(e, rect) {
-    const controlData = this._getControllData(e, rect);
+  _createIndicator(touch, controll) {
+    const x = touch.clientX - rect.left;
+    const newIndicator = document.createElement("div");
+    newIndicator.classList.add("controll-indicator");
+    newIndicator.classList.add("animate");
+    newIndicator.id = `touch${touch.identifier}`;
+    newIndicator.style.left = `${x}px`;
+    newIndicator.style.width = `${this.frameSize}%`;
+    controll.appendChild(newIndicator);
+  }
+
+  _collectData() {
     const sliderData = this._getSliderData();
+    const coordsArray = this._coordsToArray();
 
     return {
-      ...controlData,
+      coordsArray,
       sliderData,
     };
   }
 
-  _getControllData(e, rect) {
-    let x, y;
-    x = e.targetTouches[0].clientX - rect.left;
-    y = e.targetTouches[0].clientY - rect.top;
+  _coordsToArray() {
+    let coordsArray = new Array();
 
-    if (y < 0) {
-      y = 0;
-    } else if (y > rect.height) {
-      y = rect.height;
+    for (const [key, val] of this.coords.entries()) {
+      coordsArray = [...coordsArray, { id: key, x: val.x, y: val.y }];
     }
 
-    this._moveControlIndicator(x);
-
-    return {
-      x: x / rect.width,
-      y: y / rect.height,
-    };
+    return coordsArray;
   }
 
   _getSliderData() {
@@ -68,13 +87,26 @@ export class Controller {
     return sliderData;
   }
 
-  _moveControlIndicator(x) {
-    console.log(x);
-    requestAnimationFrame(() => {
-      this.controllIndicator.style.left = `${x}px`;
-      this.frameSize =
-        this.controllIndicator.offsetWidth /
-        this.controllIndicator.parentNode.clientWidth;
+  _setCoords(e, rect) {
+    Array.from(e.changedTouches).forEach((touch) => {
+      let x = touch.clientX - rect.left;
+      let y = touch.clientY - rect.top;
+
+      if (y < 0) {
+        y = 0;
+      } else if (y > rect.height) {
+        y = rect.height;
+      }
+
+      const indicator = document.getElementById(`touch${touch.identifier}`);
+      requestAnimationFrame(() => {
+        indicator.style.left = `${x}px`;
+      });
+
+      this.coords.set(touch.identifier, {
+        x: x / rect.width,
+        y: y / rect.width,
+      });
     });
   }
 }

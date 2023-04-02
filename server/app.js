@@ -58,6 +58,10 @@ io.on("connection", (socket) => {
     removeActiveUser(socket);
   });
 
+  socket.on("debug", (data) => {
+    console.log(data);
+  });
+
   socket.on("exit-queue", () => {
     removeUserFromCueue(socket);
   });
@@ -77,49 +81,51 @@ io.on("connection", (socket) => {
   });
 
   socket.on("touchstart", (data) => {
+    console.log(data);
     const user = userList.get(socket.id);
     if (!user) return;
-    udpPort.send({
-      address: "/start",
-      args: [
-        {
-          type: "f",
-          value: data.x,
-        },
-        {
-          type: "f",
-          value: data.y,
-        },
-        {
-          type: "f",
-          value: data.sliderData[0],
-        },
-        {
-          type: "f",
-          value: data.sliderData[1],
-        },
-        {
-          type: "f",
-          value: data.sliderData[2],
-        },
-        {
-          type: "f",
-          value: data.sliderData[3],
-        },
-        {
-          type: "f",
-          value: data.sliderData[4],
-        },
-        {
-          type: "i",
-          value: user.activeUserIndex,
-        },
-      ],
-    });
+    // udpPort.send({
+    //   address: "/start",
+    //   args: [
+    //     {
+    //       type: "f",
+    //       value: data.x,
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.y,
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.sliderData[0],
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.sliderData[1],
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.sliderData[2],
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.sliderData[3],
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.sliderData[4],
+    //     },
+    //     {
+    //       type: "i",
+    //       value: user.activeUserIndex,
+    //     },
+    //   ],
+    // });
   });
 
-  socket.on("touchend", () => {
+  socket.on("touchend", (data) => {
     const user = userList.get(socket.id);
+    //console.log(data);
     if (!user) return;
     udpPort.send({
       address: "/stop",
@@ -136,28 +142,30 @@ io.on("connection", (socket) => {
   socket.on("controllerData", (data) => {
     const user = userList.get(socket.id);
     if (!user) return;
-    udpPort.send({
-      address: "/controller",
-      args: [
-        {
-          type: "f",
-          value: data.x,
-        },
-        {
-          type: "f",
-          value: data.y,
-        },
-        {
-          type: "i",
-          value: user.activeUserIndex,
-        },
-      ],
-    });
+    //console.log(data);
+    // udpPort.send({
+    //   address: "/controller",
+    //   args: [
+    //     {
+    //       type: "f",
+    //       value: data.x,
+    //     },
+    //     {
+    //       type: "f",
+    //       value: data.y,
+    //     },
+    //     {
+    //       type: "i",
+    //       value: user.activeUserIndex,
+    //     },
+    //   ],
+    // });
   });
 
   // send slider data to super collider
   for (let i = 0; i < sliderNum; i++) {
     socket.on(`sliderData${i}`, (data) => {
+      console.log(data);
       const user = userList.get(socket.id);
       if (!user) return;
       udpPort.send({
