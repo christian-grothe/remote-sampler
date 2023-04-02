@@ -81,51 +81,54 @@ io.on("connection", (socket) => {
   });
 
   socket.on("touchstart", (data) => {
-    console.log(data);
+    const { coordsData, sliderData } = data;
     const user = userList.get(socket.id);
     if (!user) return;
-    // udpPort.send({
-    //   address: "/start",
-    //   args: [
-    //     {
-    //       type: "f",
-    //       value: data.x,
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.y,
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.sliderData[0],
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.sliderData[1],
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.sliderData[2],
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.sliderData[3],
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.sliderData[4],
-    //     },
-    //     {
-    //       type: "i",
-    //       value: user.activeUserIndex,
-    //     },
-    //   ],
-    // });
+    udpPort.send({
+      address: "/start",
+      args: [
+        {
+          type: "f",
+          value: coordsData.x,
+        },
+        {
+          type: "f",
+          value: coordsData.y,
+        },
+        {
+          type: "f",
+          value: sliderData[0],
+        },
+        {
+          type: "f",
+          value: sliderData[1],
+        },
+        {
+          type: "f",
+          value: sliderData[2],
+        },
+        {
+          type: "f",
+          value: sliderData[3],
+        },
+        {
+          type: "f",
+          value: sliderData[4],
+        },
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+        {
+          type: "i",
+          value: coordsData.id,
+        },
+      ],
+    });
   });
 
   socket.on("touchend", (data) => {
     const user = userList.get(socket.id);
-    console.log(data);
     if (!user) return;
     udpPort.send({
       address: "/stop",
@@ -134,33 +137,43 @@ io.on("connection", (socket) => {
           type: "i",
           value: user.activeUserIndex,
         },
+        {
+          type: "i",
+          value: data,
+        },
       ],
     });
   });
 
   // send controller data to super collider
   socket.on("controllerData", (data) => {
-    // console.log(data);
+    console.log(data);
     const user = userList.get(socket.id);
     if (!user) return;
-    //console.log(data);
-    // udpPort.send({
-    //   address: "/controller",
-    //   args: [
-    //     {
-    //       type: "f",
-    //       value: data.x,
-    //     },
-    //     {
-    //       type: "f",
-    //       value: data.y,
-    //     },
-    //     {
-    //       type: "i",
-    //       value: user.activeUserIndex,
-    //     },
-    //   ],
-    // });
+
+    data.forEach((obj) => {
+      udpPort.send({
+        address: "/controller",
+        args: [
+          {
+            type: "i",
+            value: user.activeUserIndex,
+          },
+          {
+            type: "i",
+            value: obj.id,
+          },
+          {
+            type: "f",
+            value: obj.x,
+          },
+          {
+            type: "f",
+            value: obj.y,
+          },
+        ],
+      });
+    });
   });
 
   // send slider data to super collider
@@ -200,15 +213,6 @@ function calcIndex() {
 function removeActiveUser(socket) {
   const user = userList.get(socket.id);
   if (!user) return;
-  udpPort.send({
-    address: "/stop",
-    args: [
-      {
-        type: "i",
-        value: user.activeUserIndex,
-      },
-    ],
-  });
   userList.delete(socket.id);
   io.to("remote-synth").emit("active-users", userList.size);
   fromQueueToActive();

@@ -13,6 +13,8 @@ s.freeAll;
 
 ~samplers = Order();
 
+~groups = Order();
+
 ~start.free;
 ~stop.free;
 ~rec.free;
@@ -45,7 +47,7 @@ SynthDef(\grainBuf, {
 		) / BufSamples.ir(bufNum),
 		pan: WhiteNoise.kr(),
 	);
-	env = EnvGen.ar(Env.asr(att,1,rel),envGate);
+	env = EnvGen.ar(Env.asr(att,1,rel),envGate,doneAction: 2);
 	sig = LPF.ar(sig,lpf * 2500 + 100);
 	sig = sig * env;
 	rev = FreeVerb.ar(
@@ -65,7 +67,13 @@ SynthDef(\grainBuf, {
 // start a new grainBuf
 ~start = OSCFunc({
 	|data|
-	g = Synth(\grainBuf,[
+	if(~groups[data[8]] == nil,{
+		~groups[data[8]] = Group.new;
+	});
+	if(~samplers[data[8]] == nil,{
+		~samplers[data[8]] = Order();
+	});
+	~samplers[data[8]][data[9]] = Synth(\grainBuf,[
 		\envGate, 1,
 		\pos, data[1],
 		\rate, (~scale[data[2] * (~scale.size - 1)]).midiratio,
@@ -75,15 +83,13 @@ SynthDef(\grainBuf, {
 		\revAmount, data[6],
 		\revRoom, data[7],
 		\bufNum,~buffers[data[8]],
-	]);
-	~samplers[data[8]] = g;
+	],~groups[data[8]]);
 },'/start');
 
 // stop a grainBuf
 ~stop = OSCFunc({
 	|data|
-	~samplers[data[1]].set(\envGate,0);
-
+	~samplers[data[1]][data[2]].set(\envGate,0);
 },'/stop');
 
 // record to a buffer
@@ -96,8 +102,8 @@ SynthDef(\grainBuf, {
 // get controller data
 ~controller = OSCFunc({
 	|data|
-	~samplers[data[3]].set(\pos, data[1]);
-	~samplers[data[3]].set(\rate, (~scale[data[2] * (~scale.size - 1)].midiratio));
+	~samplers[data[1]][data[2]].set(\pos, data[3]);
+	~samplers[data[1]][data[2]].set(\rate, (~scale[data[4] * (~scale.size - 1)].midiratio));
 },'/controller');
 
 // get slider data
@@ -108,23 +114,29 @@ SynthDef(\grainBuf, {
 	OSCFunc({
 		|data|
 		if(i == 0, {
-			~samplers[data[2]].set(\lpf, data[1]);
+			~groups[data[2]].set(\lpf, data[1]);
 		});
 		if(i == 1, {
-			~samplers[data[2]].set(\spray, data[1]);
+			~groups[data[2]].set(\spray, data[1]);
 		});
 		if(i == 2, {
-			~samplers[data[2]].set(\windowSize, data[1]);
+			~groups[data[2]].set(\windowSize, data[1]);
 		});
 		if(i == 3, {
-			~samplers[data[2]].set(\revAmount, data[1]);
+			~groups[data[2]].set(\revAmount, data[1]);
 		});
 		if(i == 4, {
-			~samplers[data[2]].set(\revRoom, data[1]);
+			~groups[data[2]].set(\revRoom, data[1]);
 		});
 	},addr);
 })
 )
+
+~test = Order.new;
+~test[7] = "hallo3";
+~test.removeAt(6);
+~test[7];
+~test.size;
 
 
 
