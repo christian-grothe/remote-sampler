@@ -55,11 +55,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("exit", () => {
+    const user = userList.get(socket.id);
+    if (!user) return;
+    console.log("exit");
+    udpPort.send({
+      address: "/exit",
+      args: [
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+      ],
+    });
     removeActiveUser(socket);
-  });
-
-  socket.on("debug", (data) => {
-    console.log(data);
   });
 
   socket.on("exit-queue", () => {
@@ -147,7 +155,6 @@ io.on("connection", (socket) => {
 
   // send controller data to super collider
   socket.on("controllerData", (data) => {
-    console.log(data);
     const user = userList.get(socket.id);
     if (!user) return;
 
@@ -179,7 +186,6 @@ io.on("connection", (socket) => {
   // send slider data to super collider
   for (let i = 0; i < sliderNum; i++) {
     socket.on(`sliderData${i}`, (data) => {
-      console.log(data);
       const user = userList.get(socket.id);
       if (!user) return;
       udpPort.send({
