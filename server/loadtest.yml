@@ -3,7 +3,7 @@ config:
   target: "http://localhost:3000"
   phases:
     - duration: 300
-      arrivalRate: 20
+      arrivalRate: 1
 
 scenarios:
   - name: "Emit an event"
@@ -11,4 +11,4 @@ scenarios:
     flow:
       - emit:
           channel: "start"
-      - think: 300
+      - think: 200

@@ -20,7 +20,7 @@ window.onload = function () {
   const queuePos = document.getElementById("queue-pos");
   const queueInfo = document.getElementById("queue-info");
 
-  const playTime = 12000; // 2 minutes
+  const playTime = 1200000; // 2 minutes
 
   const initVals = [0.5, 0, 0, 0, 0];
 

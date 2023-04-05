@@ -57,7 +57,6 @@ io.on("connection", (socket) => {
   socket.on("exit", () => {
     const user = userList.get(socket.id);
     if (!user) return;
-    console.log("exit");
     udpPort.send({
       address: "/exit",
       args: [
@@ -89,7 +88,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("touchstart", (data) => {
-    const { coordsData, sliderData } = data;
+    console.log(data);
+    const { newTouch, sliderData } = data;
     const user = userList.get(socket.id);
     if (!user) return;
     udpPort.send({
@@ -97,11 +97,11 @@ io.on("connection", (socket) => {
       args: [
         {
           type: "f",
-          value: coordsData.x,
+          value: newTouch.x,
         },
         {
           type: "f",
-          value: coordsData.y,
+          value: newTouch.y,
         },
         {
           type: "f",
@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
         },
         {
           type: "i",
-          value: coordsData.id,
+          value: newTouch.index,
         },
       ],
     });
@@ -153,33 +153,45 @@ io.on("connection", (socket) => {
     });
   });
 
-  // send controller data to super collider
-  socket.on("controllerData", (data) => {
+  socket.on("freegroup", () => {
     const user = userList.get(socket.id);
     if (!user) return;
+    udpPort.send({
+      address: "/exit",
+      args: [
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+      ],
+    });
+  });
 
-    data.forEach((obj) => {
-      udpPort.send({
-        address: "/controller",
-        args: [
-          {
-            type: "i",
-            value: user.activeUserIndex,
-          },
-          {
-            type: "i",
-            value: obj.id,
-          },
-          {
-            type: "f",
-            value: obj.x,
-          },
-          {
-            type: "f",
-            value: obj.y,
-          },
-        ],
-      });
+  // send controller data to super collider
+  socket.on("controllerData", (data) => {
+    console.log(data);
+    const user = userList.get(socket.id);
+    if (!user) return;
+    udpPort.send({
+      address: "/controller",
+      args: [
+        {
+          type: "i",
+          value: user.activeUserIndex,
+        },
+        {
+          type: "i",
+          value: data.index,
+        },
+        {
+          type: "f",
+          value: data.x,
+        },
+        {
+          type: "f",
+          value: data.y,
+        },
+      ],
     });
   });
 

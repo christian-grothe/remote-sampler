@@ -61,6 +61,13 @@ button {
   display: flex;
   align-items: center;
   overflow: hidden;
+  opacity: 1;
+  transition: background-color 1s;
+}
+
+.wait {
+  background-color: var(--border-color) !important;
+  opacity: 0.3;
 }
 
 .controll-indicator {
