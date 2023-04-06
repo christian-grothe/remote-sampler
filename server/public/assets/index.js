@@ -19,6 +19,7 @@ window.onload = function () {
   const queueLength = document.getElementById("queue-length");
   const queuePos = document.getElementById("queue-pos");
   const queueInfo = document.getElementById("queue-info");
+  const samplerState = document.getElementById("sampler-state");
 
   const playTime = 1200000; // 2 minutes
 
@@ -74,6 +75,7 @@ window.onload = function () {
     queueLength.innerHTML = data.queueLength;
     activeUsers.innerHTML = data.activeUsers;
     maxActiveUsersField.innerHTML = data.maxActiveUsers;
+    samplerState.innerHTML = data.state;
     exit();
   });
 

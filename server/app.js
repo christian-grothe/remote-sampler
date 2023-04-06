@@ -10,6 +10,7 @@ const sliderNum = 5;
 
 let userList = new Map();
 let queue = new Array();
+let isPause = false;
 
 const osc = require("osc");
 const udpPort = new osc.UDPPort({
@@ -37,6 +38,7 @@ io.on("connection", (socket) => {
     queueLength: queue.length,
     activeUsers: userList.size,
     maxActiveUsers,
+    state: isPause ? "paused" : "running",
   };
   socket.join("remote-synth");
   socket.emit("init", initData);
@@ -47,7 +49,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start", () => {
-    if (userList.size >= maxActiveUsers) {
+    if (userList.size >= maxActiveUsers || isPause) {
       addUserToCueue(socket);
     } else {
       activateUser(socket.id);
